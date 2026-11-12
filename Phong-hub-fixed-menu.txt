@@ -195,7 +195,11 @@ local function wrapTab(rawTab)
         -- Xóa Description để tránh button bị đẩy xuống dòng
         setting["Description"] = nil
         setting.Description = nil
-        local obj = _currentSection:AddToggle(id, setting)
+        local opts = {}
+        for k, v in pairs(setting) do opts[k] = v end
+        opts.Text = opts.Text or opts.Title or id
+        opts.Callback = setting.Callback
+        local obj = _currentSection:AddToggle(id, opts)
         return makeProxy(obj, holder)
     end
 
@@ -206,7 +210,17 @@ local function wrapTab(rawTab)
             setting["Description"] = nil
             setting.Description = nil
         end
-        local proxy = _currentSection:AddButton(setting, cb)
+        local opts
+        if type(setting) == "table" then
+            opts = {
+                Text = setting.Text or setting.Title or "Button",
+                Func = setting.Func or setting.Callback or cb,
+                Tooltip = setting.Tooltip or setting.Description
+            }
+        else
+            opts = { Text = tostring(setting), Func = cb }
+        end
+        local proxy = _currentSection:AddButton(opts)
         if proxy then
             local holder = {}
             return makeProxy(proxy, holder)
@@ -224,7 +238,10 @@ local function wrapTab(rawTab)
         setting["Callback"] = setting.Callback
         setting["Description"] = nil
         setting.Description = nil
-        local obj = _currentSection:AddDropdown(id, setting)
+        local opts = {}
+        for k, v in pairs(setting) do opts[k] = v end
+        opts.Text = opts.Text or opts.Title or id
+        local obj = _currentSection:AddDropdown(id, opts)
         return makeProxy(obj, holder)
     end
 
@@ -239,7 +256,10 @@ local function wrapTab(rawTab)
         setting["Callback"] = setting.Callback
         setting["Description"] = nil
         setting.Description = nil
-        local obj = _currentSection:AddSlider(setting)
+        local opts = {}
+        for k, v in pairs(setting) do opts[k] = v end
+        opts.Text = opts.Text or opts.Title or id
+        local obj = _currentSection:AddSlider(id, opts)
         return makeProxy(obj, holder)
     end
 
@@ -252,7 +272,10 @@ local function wrapTab(rawTab)
             if holder.extra then pcall(holder.extra, v) end
         end
         setting["Callback"] = setting.Callback
-        local obj = _currentSection:AddInput(id, setting)
+        local opts = {}
+        for k, v in pairs(setting) do opts[k] = v end
+        opts.Text = opts.Text or opts.Title or id
+        local obj = _currentSection:AddInput(id, opts)
         return makeProxy(obj, holder)
     end
 
