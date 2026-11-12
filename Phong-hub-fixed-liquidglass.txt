@@ -26,31 +26,7 @@ local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
--- EXPLOIT CHECK
-local executor = (getexecutorname and getexecutorname()) or (identifyexecutor and identifyexecutor())
-if executor then
-    if
-        string.find(executor, "Bunni") or
-        string.find(executor, "FluxusZ") or
-        string.find(executor, "Delta") or
-        string.find(executor, "Arceus") or
-        string.find(executor, "Xeno") or
-        string.find(executor, "Swift") or
-        string.find(executor, "Awp") or
-        string.find(executor, "Volcano") or
-        string.find(executor, "Argon") or
-        string.find(executor, "Macsploit") or
-        string.find(executor, "Potassium") or
-        string.find(executor, "CodeX") or
-        string.find(executor, "Velocity") or
-        string.find(executor, "Romix") or
-        string.find(executor, "Neutron")
-    then
-        print("ok")
-    else
-        game.Players.LocalPlayer:Kick("Please use Delta Exploit or PC use volcano or Exploit paid!")
-    end
-end
+-- EXPLOIT CHECK: disabled so the UI is not blocked by executor-name checks.
 
 -- ALIASES
 local ply = Players
@@ -70,9 +46,13 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
-local ParentGui = (gethui and gethui()) or CoreGui
-local old = ParentGui:FindFirstChild("PhongHubUI")
-if old then old:Destroy() end
+local ParentGui = nil
+pcall(function()
+    if typeof(gethui) == "function" then ParentGui = gethui() end
+end)
+ParentGui = ParentGui or PlayerGui or CoreGui
+local old = ParentGui and ParentGui:FindFirstChild("PhongHubUI")
+if old then pcall(function() old:Destroy() end) end
 
 local Library = {}
 Library.Theme = {
@@ -105,7 +85,7 @@ local function button(parent,text)
 end
 
 function Library:CreateWindow(cfg)
-    local gui=inst("ScreenGui",{Name="PhongHubUI",ResetOnSpawn=false,IgnoreGuiInset=true,Parent=ParentGui})
+    local gui=inst("ScreenGui",{Name="PhongHubUI",ResetOnSpawn=false,IgnoreGuiInset=true,DisplayOrder=999999,Enabled=true,Parent=ParentGui or PlayerGui or CoreGui})
     local main=inst("Frame",{Parent=gui,BackgroundColor3=Library.Theme.Background,BorderSizePixel=0,Size=UDim2.new(0,660,0,430),Position=UDim2.new(.5,-330,.5,-215),ClipsDescendants=true})
     corner(main,16); main.BackgroundTransparency=0.10; stroke(main,Library.Theme.Outline)
     local glass=inst("UIGradient",{Parent=main,Rotation=90,Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(45,50,60)),ColorSequenceKeypoint.new(1,Color3.fromRGB(18,21,26))}),Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.15),NumberSequenceKeypoint.new(1,0.35)})})
@@ -186,6 +166,8 @@ function Library:CreateWindow(cfg)
         return t
     end
     search:GetPropertyChangedSignal("Text"):Connect(function() local q=search.Text:lower();for _,t in ipairs(tabs) do t.btn.Visible=(q=="" or t.name:lower():find(q,1,true)~=nil) end end)
+    main.Visible=true
+    gui.Enabled=true
     self.Gui=gui;self.Window=main;self.ToggleKey=Enum.KeyCode.RightShift
     UIS.InputBegan:Connect(function(i,g) if not g and i.KeyCode==self.ToggleKey then main.Visible=not main.Visible end end)
 
@@ -197,6 +179,9 @@ function Library:CreateWindow(cfg)
     orb.MouseLeave:Connect(function() orb.BackgroundTransparency=0.12 end)
     orb.MouseButton1Click:Connect(function() main.Visible=not main.Visible end)
     self.ToggleOrb=orb
+    -- Always start with the menu visible. The orb can hide/show it later.
+    main.Visible=true
+    gui.Enabled=true
     return window
 end
 function Library:Notify(o) local g=self.Gui;if not g then return end;local n=inst("TextLabel",{Parent=g,BackgroundColor3=Library.Theme.Box,TextColor3=Library.Theme.PrimaryText,Text=o.Description or o.Content or "",TextSize=13,Font=Enum.Font.Gotham,Size=UDim2.new(0,300,0,55),Position=UDim2.new(1,-320,1,-75),TextWrapped=true});corner(n,6);stroke(n,Library.Theme.Accent);task.delay(o.Duration or 3,function()if n then n:Destroy()end end) end
